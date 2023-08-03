@@ -16,8 +16,10 @@ namespace Helhum\TyposcriptRendering\ViewHelpers\Widget;
 
 use Helhum\TyposcriptRendering\Uri\TyposcriptRenderingUri;
 use Helhum\TyposcriptRendering\Uri\ViewHelperContext;
+use TYPO3\CMS\Fluid\Core\Rendering\RenderingContext;
 use TYPO3Fluid\Fluid\Core\Rendering\RenderingContextInterface;
 use TYPO3Fluid\Fluid\Core\ViewHelper\AbstractViewHelper;
+use TYPO3Fluid\Fluid\Core\ViewHelper\Exception as FluidViewHelperException;
 use TYPO3Fluid\Fluid\Core\ViewHelper\Traits\CompileWithRenderStatic;
 
 class UriViewHelper extends AbstractViewHelper
@@ -29,14 +31,11 @@ class UriViewHelper extends AbstractViewHelper
      */
     public function initializeArguments()
     {
-        // @deprecated
-        $this->registerArgument('useCacheHash', 'bool', 'Deprecated: True whether the cache hash should be appended to the URL', false, null);
         $this->registerArgument('addQueryStringMethod', 'string', 'Method to be used for query string');
         $this->registerArgument('action', 'string', 'Target action');
         $this->registerArgument('arguments', 'array', 'Arguments', false, []);
         $this->registerArgument('section', 'string', 'The anchor to be added to the URI', false, '');
         $this->registerArgument('format', 'string', 'The requested format, e.g. ".html', false, '');
-        $this->registerArgument('ajax', 'bool', 'TRUE if the URI should be to an AJAX widget, FALSE otherwise.', false, true);
 
         $this->registerArgument('extensionName', 'string', 'Target Extension Name (without "tx_" prefix and no underscores). If NULL the current extension name is used');
         $this->registerArgument('pluginName', 'string', 'Target plugin. If empty, the current plugin name is used');
@@ -52,13 +51,16 @@ class UriViewHelper extends AbstractViewHelper
      */
     public static function renderStatic(array $arguments, \Closure $renderChildrenClosure, RenderingContextInterface $renderingContext)
     {
-        if ($arguments['ajax'] !== true) {
-            // @deprecated
-            trigger_error('Setting the argument "ajax" to false is deprecated. Use the TYPO3 widget view helper instead for such use case.', E_USER_DEPRECATED);
+        if (! $renderingContext instanceof RenderingContext) {
+            throw new FluidViewHelperException(
+                'Something went wrong; RenderingContext should be available in ViewHelper',
+                1638341671
+            );
         }
+
         $uri = (new TyposcriptRenderingUri())->withWidgetContext(
             new ViewHelperContext(
-                $renderingContext,
+                $renderingContext->getRequest(),
                 $arguments
             )
         );

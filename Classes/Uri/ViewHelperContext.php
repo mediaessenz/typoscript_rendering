@@ -16,17 +16,15 @@ namespace Helhum\TyposcriptRendering\Uri;
 
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Extbase\Configuration\ConfigurationManager;
-use TYPO3\CMS\Extbase\Mvc\Controller\ControllerContext;
-use TYPO3\CMS\Extbase\Object\ObjectManager;
+use TYPO3\CMS\Extbase\Mvc\RequestInterface;
 use TYPO3\CMS\Frontend\ContentObject\ContentObjectRenderer;
-use TYPO3Fluid\Fluid\Core\Rendering\RenderingContextInterface;
 
 class ViewHelperContext
 {
     /**
-     * @var RenderingContextInterface
+     * @var RequestInterface
      */
-    private $renderingContext;
+    private $request;
 
     /**
      * @var array
@@ -38,21 +36,19 @@ class ViewHelperContext
      */
     private $configurationManager;
 
-    public function __construct(RenderingContextInterface $renderingContext, array $arguments, ConfigurationManager $configurationManager = null)
+    public function __construct(RequestInterface $request, array $arguments, ConfigurationManager $configurationManager = null)
     {
-        $this->renderingContext = $renderingContext;
+        $this->request = $request;
         $this->arguments = $arguments;
         $this->configurationManager = $configurationManager;
     }
 
-    public function getControllerContext(): ControllerContext
+    /**
+     * @return RequestInterface|null
+     */
+    public function getRequest(): ?RequestInterface
     {
-        if ($this->renderingContext instanceof \TYPO3\CMS\Fluid\Core\Rendering\RenderingContext) {
-            return $this->renderingContext->getControllerContext();
-        }
-
-        // Let PHP deal with the error, we don't operate in other contexts anyway
-        return null;
+        return $this->request;
     }
 
     public function getArguments(): array
@@ -62,9 +58,8 @@ class ViewHelperContext
 
     public function getContentObject(): ContentObjectRenderer
     {
-        $configurationManager = $this->configurationManager ?? GeneralUtility::makeInstance(ObjectManager::class)->get(ConfigurationManager::class);
-        $contentObject = $configurationManager->getContentObject();
+        $configurationManager = $this->configurationManager ?? GeneralUtility::makeInstance(ConfigurationManager::class);
 
-        return $contentObject ?? GeneralUtility::makeInstance(ContentObjectRenderer::class);
+        return $configurationManager->getContentObject() ?? GeneralUtility::makeInstance(ContentObjectRenderer::class);
     }
 }

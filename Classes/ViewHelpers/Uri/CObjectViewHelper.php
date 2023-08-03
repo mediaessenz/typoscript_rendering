@@ -16,8 +16,10 @@ namespace Helhum\TyposcriptRendering\ViewHelpers\Uri;
 
 use Helhum\TyposcriptRendering\Uri\TyposcriptRenderingUri;
 use Helhum\TyposcriptRendering\Uri\ViewHelperContext;
+use TYPO3\CMS\Fluid\Core\Rendering\RenderingContext;
 use TYPO3Fluid\Fluid\Core\Rendering\RenderingContextInterface;
 use TYPO3Fluid\Fluid\Core\ViewHelper\AbstractViewHelper;
+use TYPO3Fluid\Fluid\Core\ViewHelper\Exception as FluidViewHelperException;
 use TYPO3Fluid\Fluid\Core\ViewHelper\Traits\CompileWithRenderStatic;
 
 /**
@@ -61,9 +63,16 @@ class CObjectViewHelper extends AbstractViewHelper
 
     public static function renderStatic(array $arguments, \Closure $renderChildrenClosure, RenderingContextInterface $renderingContext)
     {
+        if (! $renderingContext instanceof RenderingContext) {
+            throw new FluidViewHelperException(
+                'Something went wrong; RenderingContext should be available in ViewHelper',
+                1638341671
+            );
+        }
+
         $uri = (new TyposcriptRenderingUri())->withViewHelperContext(
             new ViewHelperContext(
-                $renderingContext,
+                $renderingContext->getRequest(),
                 $arguments
             )
         );

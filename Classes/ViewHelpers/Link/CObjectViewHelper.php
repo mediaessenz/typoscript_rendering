@@ -16,7 +16,9 @@ namespace Helhum\TyposcriptRendering\ViewHelpers\Link;
 
 use Helhum\TyposcriptRendering\Uri\TyposcriptRenderingUri;
 use Helhum\TyposcriptRendering\Uri\ViewHelperContext;
+use TYPO3\CMS\Fluid\Core\Rendering\RenderingContext;
 use TYPO3Fluid\Fluid\Core\ViewHelper\AbstractTagBasedViewHelper;
+use TYPO3Fluid\Fluid\Core\ViewHelper\Exception as FluidViewHelperException;
 
 /**
  * A view helper for creating links to render arbitrary TypoScript objects.
@@ -69,9 +71,16 @@ class CObjectViewHelper extends AbstractTagBasedViewHelper
      */
     public function render()
     {
+        if (! $this->renderingContext instanceof RenderingContext) {
+            throw new FluidViewHelperException(
+                'Something went wrong; RenderingContext should be available in ViewHelper',
+                1638341671
+            );
+        }
+
         $uri = (new TyposcriptRenderingUri())->withViewHelperContext(
             new ViewHelperContext(
-                $this->renderingContext,
+                $this->renderingContext->getRequest(),
                 $this->arguments
             )
         );

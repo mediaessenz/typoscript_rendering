@@ -24,23 +24,20 @@ use TYPO3\CMS\Frontend\ContentObject\ContentObjectRenderer;
 
 class TypoScriptRenderingContentObject extends AbstractContentObject
 {
-    /**
-     * @var RequestBuilder
-     */
-    private $requestBuilder;
+    private ?RequestBuilder $requestBuilder = null;
+
+    private array $renderer = [];
+
+    protected ?ContentObjectRenderer $cObj = null;
 
     /**
-     * @var string[]
-     */
-    private $renderer;
-
-    /**
-     * @param RequestBuilder $requestBuilder
+     * @param ContentObjectRenderer $cObj
+     * @param RequestBuilder|null $requestBuilder
      * @param string[] $renderer
      */
     public function __construct(ContentObjectRenderer $cObj, RequestBuilder $requestBuilder = null, array $renderer = null)
     {
-        parent::__construct($cObj);
+        $this->cObj = $cObj;
         $this->requestBuilder = $requestBuilder ?: new RequestBuilder();
         $this->renderer = $renderer ?: $GLOBALS['TYPO3_CONF_VARS']['EXTCONF']['typoscript_rendering']['renderClasses'];
     }
